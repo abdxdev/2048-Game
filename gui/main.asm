@@ -32,15 +32,16 @@ start:
     mov wc.lpfnWndProc, offset WndProc
     mov wc.cbClsExtra, 0
     mov wc.cbWndExtra, 0
-    mov wc.hInstance, hInstance
+    mov eax, hInstance
+    mov wc.hInstance, eax
     invoke LoadIcon, NULL, IDI_APPLICATION
     mov wc.hIcon, eax
     invoke LoadCursor, NULL, IDC_ARROW
     mov wc.hCursor, eax
 
-    ; Background color
-    invoke ConvertHexColor, hexColor 
-    invoke CreateSolidBrush, eax               
+    ;backgroundColor
+    INVOKE ConvertHexColor, hexColor 
+    INVOKE CreateSolidBrush, eax               
     mov wc.hbrBackground, eax
     
     mov wc.lpszMenuName, NULL
@@ -49,29 +50,27 @@ start:
 
     ; Register Window Class
     invoke RegisterClass, addr wc
-    .if eax == 0
-        jmp Exit  ; If RegisterClass fails, exit
-    .endif
+    test eax, eax
+    jz Exit  ; If RegisterClass fails, exit
 
     invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, \
                           WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, \
                           800, 600, NULL, NULL, hInstance, NULL
     mov hwndMain, eax
-    .if eax == 0
-        jmp Exit  ; If CreateWindowEx fails, exit
-    .endif
+    test eax, eax
+    jz Exit  ; If CreateWindowEx fails, exit
 
     ; Show and update the window
     invoke ShowWindow, hwndMain, SW_SHOWNORMAL
     invoke UpdateWindow, hwndMain
 
-    ; Message Loop
-    .while TRUE
-        invoke GetMessage, addr msg, NULL, 0, 0
-        .break .if eax == 0
-        invoke TranslateMessage, addr msg
-        invoke DispatchMessage, addr msg
-    .endw
+MessageLoop:
+    invoke GetMessage, addr msg, NULL, 0, 0
+    cmp eax, 0
+    je Exit
+    invoke TranslateMessage, addr msg
+    invoke DispatchMessage, addr msg
+    jmp MessageLoop
 
 Exit:
     invoke ExitProcess, 0
