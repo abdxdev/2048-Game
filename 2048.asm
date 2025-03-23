@@ -2,14 +2,19 @@
 .model flat, stdcall
 .stack 4096
 
-include Irvine32.inc
-; include SmallWin.inc
+include c:/Irvine/Irvine32.inc
 
 .data
     WinScore DD 2048
-    Score DD 0
+    IsWon DD 0
+    IsInfiniteMode DD 0
+    CurrentScore DD 0
     HighScore DD 0
-    Board DD 16 DUP(0)
+
+    BoardSize EQU 4
+    Board DD BoardSize*BoardSize DUP(0)
+    TempBoard DD BoardSize*BoardSize DUP(0)
+    
     msgGameOver DB "Game Over!", 0
     msgYouWon DB "You Won!", 0
 
@@ -20,7 +25,7 @@ init_board PROC
     mov i, 0
     .while i < lengthof Board
         mov eax, i
-        mov DWORD PTR Board[eax*4], 0
+        mov DWORD PTR Board[eax*Type Board], 0
         inc i
     .endw
 
@@ -29,13 +34,13 @@ init_board PROC
         mov eax, lengthof Board
         invoke RandomRange
         mov edx, eax
-        mov eax, DWORD PTR Board[edx*4]
+        mov eax, DWORD PTR Board[edx*Type Board]
         .if eax == 0
             mov eax, 2
             invoke RandomRange
             inc eax
             shl eax, 1
-            mov DWORD PTR Board[edx*4], eax
+            mov DWORD PTR Board[edx*Type Board], eax
             inc i
         .endif
     .endw
@@ -47,15 +52,15 @@ display_board PROC
     mov i, 0
     .while i < lengthof Board
         mov eax, i
-        mov eax, DWORD PTR Board[eax*4]
+        mov eax, DWORD PTR Board[eax*Type Board]
         invoke WriteInt
 
         mov eax, i
         mov edx, 0
-        mov ebx, 4
-        div ebx  ; i / 4
+        mov ebx, BoardSize
+        div ebx  ; i / BoardSize
 
-        .if edx == 3
+        .if edx == BoardSize - 1
             invoke crlf
         .else
             mov eax, ' '
@@ -72,7 +77,7 @@ is_full PROC
     mov i, 0
     .while i < lengthof Board
         mov eax, i
-        mov eax, DWORD PTR Board[eax*4]  ; Corrected the indexing to use 'eax' instead of '*'
+        mov eax, DWORD PTR Board[eax*Type Board]
         .if eax == 0
             mov eax, 0
             ret
@@ -87,12 +92,12 @@ can_move PROC
     LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD
 
     mov i, 0
-    .while i < 4
+    .while i < BoardSize
         mov j, 0
-        .while j < 4
+        .while j < BoardSize
 
             mov eax, i
-            imul eax, 4
+            imul eax, BoardSize
             add eax, j
             imul eax, 4
             mov index, eax
@@ -174,7 +179,7 @@ is_won PROC
     mov i, 0
     .while i < lengthof Board
         mov eax, i
-        mov eax, DWORD PTR Board[eax*4]
+        mov eax, DWORD PTR Board[eax*Type Board]
         .if eax == WinScore
             mov eax, 1
             ret
@@ -185,8 +190,93 @@ is_won PROC
     ret
 is_won ENDP
 
+copy_to_temp PROC
+    LOCAL i:DWORD
+    mov i, 0
+    .while i < lengthof Board
+        mov eax, i
+        mov edx, DWORD PTR Board[eax*Type Board]
+        mov DWORD PTR TempBoard[eax*Type Board], edx
+        inc i
+    .endw
+    ret
+copy_to_temp ENDP
+
+copy_from_temp PROC
+    LOCAL i:DWORD
+    mov i, 0
+    .while i < lengthof Board
+        mov eax, i
+        mov edx, DWORD PTR TempBoard[eax*Type Board]
+        mov DWORD PTR Board[eax*Type Board], edx
+        inc i
+    .endw
+    ret
+copy_from_temp ENDP
+
 move PROC, direction:DWORD
-    ; TODO: Implement the move logic
+    LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD, k:DWORD, l:DWORD, moved:DWORD
+    invoke copy_to_temp
+    .if direction == 0 ; Up
+        mov j, 0
+        .while j < BoardSize
+            mov i, 1
+            .while i < BoardSize
+                ; TODO: Implement the move logic for Up direction
+                inc i
+            .endw
+            inc j
+        .endw
+    .elseif direction == 1 ; Left
+        mov i, 0
+        .while i < BoardSize
+            mov j, 1
+            .while j < BoardSize
+                ; TODO: Implement the move logic for Left direction
+                inc j
+            .endw
+            inc i
+        .endw
+    .elseif direction == 2 ; Down
+        mov j, 0
+        .while j < BoardSize
+            mov i, BoardSize - 2
+            .while i == 0 || i > BoardSize
+                ; TODO: Implement the move logic for Down direction
+                dec i
+            .endw
+            inc j
+        .endw
+    .elseif direction == 3 ; Right
+        mov i, 0
+        .while i < BoardSize
+            mov j, BoardSize - 2
+            .while j == 0 || j > BoardSize
+                ; TODO: Implement the move logic for Right direction
+                dec j
+            .endw
+            inc i
+        .endw
+    .endif
+
+    .if moved == 1
+        mov eax, lengthof Board
+        invoke RandomRange
+        .while Board[eax*Type Board] != 0
+            mov eax, lengthof Board
+            invoke RandomRange
+        .endw
+        mov edx, eax
+        mov eax, 2
+        invoke RandomRange
+        inc eax
+        shl eax, 1
+        mov DWORD PTR Board[edx*Type Board], eax
+        mov eax, 1
+    .else
+        invoke copy_from_temp
+        mov eax, 0
+    .endif
     ret
 move ENDP
 
@@ -224,17 +314,21 @@ run PROC
             invoke ExitProcess, 0
         .elseif eax != -1
             invoke move, eax
-            invoke Clrscr
-            invoke display_board
-            invoke is_won
             .if eax == 1
-                invoke MessageBox, NULL, addr msgYouWon, NULL, MB_OK
-                invoke ExitProcess, 0
-            .endif
-            invoke is_game_over
-            .if eax == 1
-                invoke MessageBox, NULL, addr msgGameOver, NULL, MB_OK
-                invoke ExitProcess, 0
+                invoke Clrscr
+                invoke display_board
+
+                invoke is_won 
+                .if eax == 1
+                    invoke MessageBox, NULL, addr msgYouWon, NULL, MB_OK
+                    invoke ExitProcess, 0
+                .endif
+                
+                invoke is_game_over
+                .if eax == 1
+                    invoke MessageBox, NULL, addr msgGameOver, NULL, MB_OK
+                    invoke ExitProcess, 0
+                .endif
             .endif
         .endif
     .endw
