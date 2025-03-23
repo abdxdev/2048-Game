@@ -14,7 +14,7 @@ includelib \masm32\lib\user32.lib
 includelib \masm32\lib\gdi32.lib
 
 .data
-    ClassName   db "MyWinClass", 0
+    ClassName   db "MainWinClass", 0
     AppTitle    db "2048 Game", 0
     msg         MSG <>
     wc          WNDCLASS <>
@@ -34,8 +34,8 @@ start:
     mov wc.hCursor, eax
 
     ; Background color
-    invoke ConvertHexColor, hexColor 
-    invoke CreateSolidBrush, eax               
+    invoke ConvertHexColor, hexColor
+    invoke CreateSolidBrush, eax
     mov wc.hbrBackground, eax
 
     ; Register Class
