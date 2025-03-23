@@ -1,0 +1,7 @@
+*
+!*.asm
+!*.cpp
+!*.c
+!.gitignore
+test*
+temp*
