@@ -13,11 +13,11 @@ ConvertHexColor proc color:DWORD
     shl eax, 16      
     and edx, 0FF00h  
     or eax, edx      
-    shr edx, 8       
-    and ecx, 0FF0000h
+    mov ecx, color   
+    and ecx, 0FF0000h 
     shr ecx, 16      
-    or eax, ecx      ; final format: 0xBBGGRR
+    or eax, ecx      ; Combine BBGGRR
+    
     ret
 ConvertHexColor endp
-
 end
