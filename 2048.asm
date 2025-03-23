@@ -105,6 +105,14 @@ get_value PROC, i:DWORD, j:DWORD
     ret
 get_value ENDP
 
+set_value PROC, i:DWORD, j:DWORD, value:DWORD
+    ; Board[(i * BoardSize + j) * Type Board] = value
+    invoke get_index, i, j
+    mov ebx, value
+    mov DWORD PTR [Board + eax], ebx
+    ret
+set_value ENDP
+
 can_move PROC
     LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD
 
@@ -177,34 +185,34 @@ is_won PROC
     ret
 is_won ENDP
 
-copy_to_temp PROC
-    LOCAL i:DWORD
-    mov i, 0
-    .while i < lengthof Board
-        mov eax, i
-        mov edx, DWORD PTR Board[eax*Type Board]
-        mov DWORD PTR TempBoard[eax*Type Board], edx
-        inc i
-    .endw
-    ret
-copy_to_temp ENDP
+; copy_to_temp PROC
+;     LOCAL i:DWORD
+;     mov i, 0
+;     .while i < lengthof Board
+;         mov eax, i
+;         mov edx, DWORD PTR Board[eax*Type Board]
+;         mov DWORD PTR TempBoard[eax*Type Board], edx
+;         inc i
+;     .endw
+;     ret
+; copy_to_temp ENDP
 
-copy_from_temp PROC
-    LOCAL i:DWORD
-    mov i, 0
-    .while i < lengthof Board
-        mov eax, i
-        mov edx, DWORD PTR TempBoard[eax*Type Board]
-        mov DWORD PTR Board[eax*Type Board], edx
-        inc i
-    .endw
-    ret
-copy_from_temp ENDP
+; copy_from_temp PROC
+;     LOCAL i:DWORD
+;     mov i, 0
+;     .while i < lengthof Board
+;         mov eax, i
+;         mov edx, DWORD PTR TempBoard[eax*Type Board]
+;         mov DWORD PTR Board[eax*Type Board], edx
+;         inc i
+;     .endw
+;     ret
+; copy_from_temp ENDP
 
 move PROC, direction:DWORD
     LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD, k:DWORD, l:DWORD, moved:DWORD
     mov moved, 0
-    invoke copy_to_temp
+    ; invoke copy_to_temp
     
     .if direction == 0 ; Up
         mov j, 0
@@ -213,20 +221,31 @@ move PROC, direction:DWORD
             .while i < BoardSize
 
                 invoke get_value, i, j
-                .continue .if eax == 0
+                .if eax == 0
+                    inc i
+                    .continue
+                .endif
             
                 mov eax, i
                 mov k, eax 
                 .while k > 0
                     invoke get_value, k - 1, j
                     .break .if eax != 0
-                    ; TODO: Implement the move logic for Up direction
-                    dec k
+                    invoke get_value, k, j
+                    invoke set_value, k - 1, j, eax
+                    invoke set_value, k, j, 0
                     mov moved, 1
+                    dec k
                 .endw
             
-                .if k > 0 ;TODO
-                    ; TODO: Implement merging logic for Up direction
+                invoke get_value, k, j
+                mov ebx, eax
+                invoke get_value, k - 1, j
+                .if k > 0 && ebx == eax
+                    shl eax, 1
+                    invoke set_value, k - 1, j, eax
+                    add CurrentScore, eax
+                    invoke set_value, k, j, 0
                     mov moved, 1
                 .endif
             
@@ -241,20 +260,31 @@ move PROC, direction:DWORD
             .while j < BoardSize
 
                 invoke get_value, i, j
-                .continue .if eax == 0
+                .if eax == 0
+                    inc j
+                    .continue
+                .endif
             
                 mov eax, j
                 mov k, eax
                 .while k > 0
                     invoke get_value, i, k - 1
                     .break .if eax != 0
-                    ; TODO: Implement the move logic for Left direction
-                    dec k
+                    invoke get_value, k, j
+                    invoke set_value, i, k - 1, eax
+                    invoke set_value, i, k, 0
                     mov moved, 1
+                    dec k
                 .endw
             
-                .if k > 0 ;TODO
-                    ; TODO: Implement merging logic for Left direction
+                invoke get_value, i, k
+                mov ebx, eax
+                invoke get_value, i, k - 1
+                .if k > 0 && ebx == eax
+                    shl eax, 1
+                    invoke set_value, i, k - 1, eax
+                    add CurrentScore, eax
+                    invoke set_value, i, k, 0
                     mov moved, 1
                 .endif
             
@@ -266,23 +296,34 @@ move PROC, direction:DWORD
         mov j, 0
         .while j < BoardSize
             mov i, BoardSize - 2
-            .while i == 0 || i > BoardSize
+            .while i == 0 || i > 0
                 
                 invoke get_value, i, j
-                .continue .if eax == 0
+                .if eax == 0
+                    dec i
+                    .continue
+                .endif
                 
                 mov eax, i
                 mov k, eax
                 .while k < BoardSize - 1
                     invoke get_value, k + 1, j
                     .break .if eax != 0
-                    ; TODO: Implement the move logic for Down direction
-                    inc k
+                    invoke get_value, k, j
+                    invoke set_value, k + 1, j, eax
+                    invoke set_value, k, j, 0
                     mov moved, 1
+                    inc k
                 .endw
                 
-                .if k < BoardSize - 1 ;TODO
-                    ; TODO: Implement merging logic for Down direction
+                invoke get_value, k, j
+                mov ebx, eax
+                invoke get_value, k + 1, j
+                .if k < BoardSize - 1 && ebx == eax
+                    shl eax, 1
+                    invoke set_value, k + 1, j, eax
+                    add CurrentScore, eax
+                    invoke set_value, k, j, 0
                     mov moved, 1
                 .endif
                 
@@ -294,23 +335,34 @@ move PROC, direction:DWORD
         mov i, 0
         .while i < BoardSize
             mov j, BoardSize - 2
-            .while j == 0 || j > BoardSize
+            .while j == 0 || j > 0
                 
                 invoke get_value, i, j
-                .continue .if eax == 0
+                .if eax == 0
+                    dec j
+                    .continue
+                .endif
                 
                 mov eax, j
                 mov k, eax
                 .while k < BoardSize - 1
                     invoke get_value, i, k + 1
                     .break .if eax != 0
-                    ; TODO: Implement the move logic for Right direction
-                    inc k
+                    invoke get_value, i, k
+                    invoke set_value, i, k + 1, eax
+                    invoke set_value, i, k, 0
                     mov moved, 1
+                    inc k
                 .endw
                 
-                .if k < BoardSize - 1 ;TODO
-                    ; TODO: Implement merging logic for Right direction
+                invoke get_value, i, k
+                mov ebx, eax
+                invoke get_value, i, k + 1
+                .if k < BoardSize - 1 && ebx == eax
+                    shl eax, 1
+                    invoke set_value, i, k + 1, eax
+                    add CurrentScore, eax
+                    invoke set_value, i, k, 0
                     mov moved, 1
                 .endif
                 
@@ -335,7 +387,7 @@ move PROC, direction:DWORD
         mov DWORD PTR Board[edx*Type Board], eax
         mov eax, 1
     .else
-        invoke copy_from_temp
+        ; invoke copy_from_temp
         mov eax, 0
     .endif
     ret

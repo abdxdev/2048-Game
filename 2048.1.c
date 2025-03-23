@@ -85,12 +85,12 @@ int can_move() {
 
 int move(int dir) {
     int moved = 0;
-    int prev_board[SIZE * SIZE];
+    // int prev_board[SIZE * SIZE];
     
     // Save the current board state
-    for (int i = 0; i < SIZE * SIZE; i++) {
-        prev_board[i] = board[i];
-    }
+    // for (int i = 0; i < SIZE * SIZE; i++) {
+    //     prev_board[i] = board[i];
+    // }
     
     if (dir == 0) {  // Up
         for (int j = 0; j < SIZE; j++) {
@@ -183,9 +183,9 @@ int move(int dir) {
         board[i] = (rand() % 2 + 1) * 2;
     } else {
         // Restore the board if no movement was made
-        for (int i = 0; i < SIZE * SIZE; i++) {
-            board[i] = prev_board[i];
-        }
+        // for (int i = 0; i < SIZE * SIZE; i++) {
+        //     board[i] = prev_board[i];
+        // }
         return 0;
     }
     
