@@ -17,7 +17,6 @@ ConvertHexColor proc color:DWORD
     and ecx, 0FF0000h 
     shr ecx, 16      
     or eax, ecx      ; Combine BBGGRR
-    
     ret
 ConvertHexColor endp
 end

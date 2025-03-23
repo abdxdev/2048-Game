@@ -16,23 +16,17 @@ includelib \masm32\lib\gdi32.lib
 .data
     ClassName   db "MyWinClass", 0
     AppTitle    db "2048 Game", 0
-    hInstance   dd ?
     msg         MSG <>
     wc          WNDCLASS <>
-    hwndMain    dd ?
     hexColor    dd  00ffd0c7h
 
 .code
 start:
-    invoke GetModuleHandle, NULL
-    mov hInstance, eax
-
-    ; Setup Window Class
+    ; Configure Window Class
     mov wc.style, CS_HREDRAW or CS_VREDRAW
     mov wc.lpfnWndProc, offset WndProc
-    mov wc.cbClsExtra, 0
-    mov wc.cbWndExtra, 0
-    mov eax, hInstance
+    mov wc.lpszClassName, offset ClassName
+    invoke GetModuleHandle, NULL
     mov wc.hInstance, eax
     invoke LoadIcon, NULL, IDI_APPLICATION
     mov wc.hIcon, eax
@@ -43,28 +37,22 @@ start:
     invoke ConvertHexColor, hexColor 
     invoke CreateSolidBrush, eax               
     mov wc.hbrBackground, eax
-    
-    mov wc.lpszMenuName, NULL
-    lea eax, ClassName
-    mov wc.lpszClassName, eax
 
-    ; Register Window Class
+    ; Register Class
     invoke RegisterClass, addr wc
     .if eax == 0
-        jmp Exit
+        invoke ExitProcess, 0
     .endif
 
-    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, \
-                          WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, \
-                          800, 600, NULL, NULL, hInstance, NULL
-    mov hwndMain, eax
-    .if eax == 0
-        jmp Exit  ; If CreateWindowEx fails, exit
+    ; Create Window
+    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, wc.hInstance, NULL
+    .if eax == NULL
+        invoke ExitProcess, 0
     .endif
 
-    ; Show and update the window
-    invoke ShowWindow, hwndMain, SW_SHOWNORMAL
-    invoke UpdateWindow, hwndMain
+    ; Show & Update Window
+    invoke ShowWindow, eax, SW_SHOWNORMAL
+    invoke UpdateWindow, eax
 
     ; Message Loop
     .while TRUE
@@ -74,7 +62,6 @@ start:
         invoke DispatchMessage, addr msg
     .endw
 
-Exit:
     invoke ExitProcess, 0
 
 ; Window Procedure
