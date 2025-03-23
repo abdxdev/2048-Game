@@ -1,7 +1,6 @@
-*
-!*.asm
-!*.cpp
-!*.c
-!.gitignore
+*.ilk
+*.pdb
+*.exe
+*.obj
 test*
 temp*
