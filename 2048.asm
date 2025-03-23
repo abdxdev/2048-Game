@@ -131,7 +131,9 @@ can_move PROC
 
             ; Check right
             .if j < BoardSize - 1
-                invoke get_value, i, j + 1
+                mov edx, j
+                inc edx
+                invoke get_value, i, edx
                 .if value == eax
                     mov eax, 1
                     ret
@@ -140,7 +142,9 @@ can_move PROC
 
             ; Check down
             .if i < BoardSize - 1
-                invoke get_value, i + 1, j
+                mov edx, i
+                inc edx
+                invoke get_value, edx, j
                 .if value == eax
                     mov eax, 1
                     ret
@@ -229,10 +233,12 @@ move PROC, direction:DWORD
                 mov eax, i
                 mov k, eax 
                 .while k > 0
-                    invoke get_value, k - 1, j
+                    mov edx, k
+                    dec edx
+                    invoke get_value, edx, j
                     .break .if eax != 0
                     invoke get_value, k, j
-                    invoke set_value, k - 1, j, eax
+                    invoke set_value, edx, j, eax
                     invoke set_value, k, j, 0
                     mov moved, 1
                     dec k
@@ -240,10 +246,12 @@ move PROC, direction:DWORD
             
                 invoke get_value, k, j
                 mov ebx, eax
-                invoke get_value, k - 1, j
+                mov edx, k
+                dec edx
+                invoke get_value, edx, j
                 .if k > 0 && ebx == eax
                     shl eax, 1
-                    invoke set_value, k - 1, j, eax
+                    invoke set_value, edx, j, eax
                     add CurrentScore, eax
                     invoke set_value, k, j, 0
                     mov moved, 1
@@ -268,10 +276,12 @@ move PROC, direction:DWORD
                 mov eax, j
                 mov k, eax
                 .while k > 0
-                    invoke get_value, i, k - 1
+                    mov edx, k
+                    dec edx
+                    invoke get_value, i, edx
                     .break .if eax != 0
-                    invoke get_value, k, j
-                    invoke set_value, i, k - 1, eax
+                    invoke get_value, i, k
+                    invoke set_value, i, edx, eax
                     invoke set_value, i, k, 0
                     mov moved, 1
                     dec k
@@ -279,10 +289,12 @@ move PROC, direction:DWORD
             
                 invoke get_value, i, k
                 mov ebx, eax
-                invoke get_value, i, k - 1
+                mov edx, k
+                dec edx
+                invoke get_value, i, edx
                 .if k > 0 && ebx == eax
                     shl eax, 1
-                    invoke set_value, i, k - 1, eax
+                    invoke set_value, i, edx, eax
                     add CurrentScore, eax
                     invoke set_value, i, k, 0
                     mov moved, 1
@@ -295,11 +307,16 @@ move PROC, direction:DWORD
     .elseif direction == 2 ; Down
         mov j, 0
         .while j < BoardSize
-            mov i, BoardSize - 2
-            .while i == 0 || i > 0
+            mov ecx, BoardSize
+            sub ecx, 2
+            mov i, ecx
+            .while i >= 0
                 
                 invoke get_value, i, j
                 .if eax == 0
+                    .if i == 0
+                        .break
+                    .endif
                     dec i
                     .continue
                 .endif
@@ -307,10 +324,12 @@ move PROC, direction:DWORD
                 mov eax, i
                 mov k, eax
                 .while k < BoardSize - 1
-                    invoke get_value, k + 1, j
+                    mov edx, k
+                    inc edx
+                    invoke get_value, edx, j
                     .break .if eax != 0
                     invoke get_value, k, j
-                    invoke set_value, k + 1, j, eax
+                    invoke set_value, edx, j, eax
                     invoke set_value, k, j, 0
                     mov moved, 1
                     inc k
@@ -318,15 +337,20 @@ move PROC, direction:DWORD
                 
                 invoke get_value, k, j
                 mov ebx, eax
-                invoke get_value, k + 1, j
+                mov edx, k
+                inc edx
+                invoke get_value, edx, j
                 .if k < BoardSize - 1 && ebx == eax
                     shl eax, 1
-                    invoke set_value, k + 1, j, eax
+                    invoke set_value, edx, j, eax
                     add CurrentScore, eax
                     invoke set_value, k, j, 0
                     mov moved, 1
                 .endif
                 
+                .if i == 0
+                    .break
+                .endif
                 dec i
             .endw
             inc j
@@ -334,11 +358,16 @@ move PROC, direction:DWORD
     .elseif direction == 3 ; Right
         mov i, 0
         .while i < BoardSize
-            mov j, BoardSize - 2
-            .while j == 0 || j > 0
+            mov ecx, BoardSize
+            sub ecx, 2
+            mov j, ecx
+            .while j >= 0
                 
                 invoke get_value, i, j
                 .if eax == 0
+                    .if j == 0
+                        .break
+                    .endif
                     dec j
                     .continue
                 .endif
@@ -346,10 +375,12 @@ move PROC, direction:DWORD
                 mov eax, j
                 mov k, eax
                 .while k < BoardSize - 1
-                    invoke get_value, i, k + 1
+                    mov edx, k
+                    inc edx
+                    invoke get_value, i, edx
                     .break .if eax != 0
                     invoke get_value, i, k
-                    invoke set_value, i, k + 1, eax
+                    invoke set_value, i, edx, eax
                     invoke set_value, i, k, 0
                     mov moved, 1
                     inc k
@@ -357,15 +388,19 @@ move PROC, direction:DWORD
                 
                 invoke get_value, i, k
                 mov ebx, eax
-                invoke get_value, i, k + 1
+                mov edx, k
+                inc edx
+                invoke get_value, i, edx
                 .if k < BoardSize - 1 && ebx == eax
                     shl eax, 1
-                    invoke set_value, i, k + 1, eax
+                    invoke set_value, i, edx, eax
                     add CurrentScore, eax
                     invoke set_value, i, k, 0
                     mov moved, 1
                 .endif
-                
+                .if j == 0
+                    .break
+                .endif
                 dec j
             .endw
             inc i
