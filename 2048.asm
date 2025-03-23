@@ -88,6 +88,23 @@ is_full PROC
     ret
 is_full ENDP
 
+get_index PROC, i:DWORD, j:DWORD
+    ; return (i * BoardSize + j) * Type Board
+    mov eax, i
+    imul eax, BoardSize
+    add eax, j
+    imul eax, Type Board
+    ret
+get_index ENDP
+
+get_value PROC, i:DWORD, j:DWORD
+    ; return Board[(i * BoardSize + j) * Type Board]
+    LOCAL index:DWORD
+    invoke get_index, i, j
+    mov eax, DWORD PTR Board[eax]
+    ret
+get_value ENDP
+
 can_move PROC
     LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD
 
@@ -96,15 +113,7 @@ can_move PROC
         mov j, 0
         .while j < BoardSize
 
-            mov eax, i
-            imul eax, BoardSize
-            add eax, j
-            imul eax, 4
-            mov index, eax
-
-            mov ebx, offset Board
-            add ebx, index
-            mov eax, DWORD PTR [ebx]
+            invoke get_value, i, j
             mov value, eax
 
             .if value == 0
@@ -112,44 +121,22 @@ can_move PROC
                 ret
             .endif
 
-            .if j > 0 ; Check left
-                sub ebx, 4
-                mov edx, DWORD PTR [ebx]
-                .if value == edx
+            ; Check right
+            .if j < BoardSize - 1
+                invoke get_value, i, j + 1
+                .if value == eax
                     mov eax, 1
                     ret
                 .endif
-                add ebx, 4
             .endif
 
-            .if j < 3 ; Check right
-                add ebx, 4
-                mov edx, DWORD PTR [ebx]
-                .if value == edx
+            ; Check down
+            .if i < BoardSize - 1
+                invoke get_value, i + 1, j
+                .if value == eax
                     mov eax, 1
                     ret
                 .endif
-                sub ebx, 4
-            .endif
-
-            .if i > 0 ; Check up
-                sub ebx, 16
-                mov edx, DWORD PTR [ebx]
-                .if value == edx
-                    mov eax, 1
-                    ret
-                .endif
-                add ebx, 16
-            .endif
-
-            .if i < 3 ; Check down
-                add ebx, 16
-                mov edx, DWORD PTR [ebx]
-                .if value == edx
-                    mov eax, 1
-                    ret
-                .endif
-                sub ebx, 16
             .endif
 
             inc j
@@ -216,13 +203,33 @@ copy_from_temp ENDP
 
 move PROC, direction:DWORD
     LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD, k:DWORD, l:DWORD, moved:DWORD
+    mov moved, 0
     invoke copy_to_temp
+    
     .if direction == 0 ; Up
         mov j, 0
         .while j < BoardSize
             mov i, 1
             .while i < BoardSize
-                ; TODO: Implement the move logic for Up direction
+
+                invoke get_value, i, j
+                .continue .if eax == 0
+            
+                mov eax, i
+                mov k, eax 
+                .while k > 0
+                    invoke get_value, k - 1, j
+                    .break .if eax != 0
+                    ; TODO: Implement the move logic for Up direction
+                    dec k
+                    mov moved, 1
+                .endw
+            
+                .if k > 0 ;TODO
+                    ; TODO: Implement merging logic for Up direction
+                    mov moved, 1
+                .endif
+            
                 inc i
             .endw
             inc j
@@ -232,7 +239,25 @@ move PROC, direction:DWORD
         .while i < BoardSize
             mov j, 1
             .while j < BoardSize
-                ; TODO: Implement the move logic for Left direction
+
+                invoke get_value, i, j
+                .continue .if eax == 0
+            
+                mov eax, j
+                mov k, eax
+                .while k > 0
+                    invoke get_value, i, k - 1
+                    .break .if eax != 0
+                    ; TODO: Implement the move logic for Left direction
+                    dec k
+                    mov moved, 1
+                .endw
+            
+                .if k > 0 ;TODO
+                    ; TODO: Implement merging logic for Left direction
+                    mov moved, 1
+                .endif
+            
                 inc j
             .endw
             inc i
@@ -242,7 +267,25 @@ move PROC, direction:DWORD
         .while j < BoardSize
             mov i, BoardSize - 2
             .while i == 0 || i > BoardSize
-                ; TODO: Implement the move logic for Down direction
+                
+                invoke get_value, i, j
+                .continue .if eax == 0
+                
+                mov eax, i
+                mov k, eax
+                .while k < BoardSize - 1
+                    invoke get_value, k + 1, j
+                    .break .if eax != 0
+                    ; TODO: Implement the move logic for Down direction
+                    inc k
+                    mov moved, 1
+                .endw
+                
+                .if k < BoardSize - 1 ;TODO
+                    ; TODO: Implement merging logic for Down direction
+                    mov moved, 1
+                .endif
+                
                 dec i
             .endw
             inc j
@@ -252,7 +295,25 @@ move PROC, direction:DWORD
         .while i < BoardSize
             mov j, BoardSize - 2
             .while j == 0 || j > BoardSize
-                ; TODO: Implement the move logic for Right direction
+                
+                invoke get_value, i, j
+                .continue .if eax == 0
+                
+                mov eax, j
+                mov k, eax
+                .while k < BoardSize - 1
+                    invoke get_value, i, k + 1
+                    .break .if eax != 0
+                    ; TODO: Implement the move logic for Right direction
+                    inc k
+                    mov moved, 1
+                .endw
+                
+                .if k < BoardSize - 1 ;TODO
+                    ; TODO: Implement merging logic for Right direction
+                    mov moved, 1
+                .endif
+                
                 dec j
             .endw
             inc i

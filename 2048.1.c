@@ -57,17 +57,15 @@ int is_won() {
     return 0;
 }
 
-int can_move() {
-    // Check for empty cells
-    for (int i = 0; i < SIZE * SIZE; i++) {
-        if (board[i] == 0) {
-            return 1;
-        }
-    }
-    
-    // Check for adjacent matching tiles
+int can_move() {    
+    // Check for empty tiles
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
+
+            if (board[idx(i, j)] == 0) {
+                return 1;
+            }
+
             int current = idx(i, j);
             
             // Check right
