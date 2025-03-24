@@ -6,11 +6,11 @@ include utils.inc
 
 
 .data
-    ClassName   db "MainWinClass", 0
-    AppTitle    db "2048 Game", 0
-    msg         MSG <>
-    wc          WNDCLASS <>
-    hexColor    dd  00ffd0c7h
+    ClassName db "MainWinClass", 0
+    AppTitle db "2048 Game", 0
+    msg MSG <>
+    wc WNDCLASS <>
+    hexColor dd 00ffd0c7h
     gridCellNo dd 16 dup(0)
     num dd 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16
 

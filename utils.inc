@@ -14,4 +14,4 @@ GetRandomIndex PROTO :DWORD
 DrawGrid PROTO :DWORD
 printf PROTO C :PTR SBYTE, :VARARG   
 DisplayNumber PROTO :DWORD, :DWORD, :DWORD
-CaptureKeyInput PROTO          ; New prototype for capturing key inputs
+CaptureKeyInput PROTO
