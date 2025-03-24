@@ -16,7 +16,7 @@ include c:/Irvine/Irvine32.inc
     TempBoard DD BoardSize*BoardSize DUP(0)
     
     msgGameOver DB "Game Over!", 0
-    msgYouWon DB "You Won!", 0
+    msgYouWon DB "You Won Congrats!", 0
 
 .code
 
