@@ -165,14 +165,14 @@ DisplayNumber proc hdc:DWORD, cellNo:DWORD, number:DWORD
     mov ebx, 100
     mul ebx
     add eax, 50  ; Left margin
-    add eax, 35  ; Adjust for better centering
+    add eax, 30  ; Adjust for better centering
     mov cellX, eax
 
     mov eax, row
     mov ebx, 100
     mul ebx
     add eax, 50  ; Top margin
-    add eax, 35  ; Adjust for better centering
+    add eax, 30  ; Adjust for better centering
     mov cellY, eax
 
     ; Set text background to transparent
