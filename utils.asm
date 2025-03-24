@@ -101,7 +101,7 @@ DrawGrid proc hdc:DWORD
     LOCAL y:DWORD
     LOCAL cellSize:DWORD
 
-    mov cellSize, 100  ; 
+    mov cellSize, 95  ; 
 
     ; Draw vertical lines (5 lines for 4 cells)
     mov i, 0
@@ -111,10 +111,10 @@ VLoop:
 
     mov eax, i
     mul cellSize
-    add eax, 50  ; Adjusted to start at 50
+    add eax, 200  ; Adjusted to start at 50
     mov x, eax
 
-    invoke MoveToEx, hdc, x, 50, NULL
+    invoke MoveToEx, hdc, x, 70, NULL
     invoke LineTo, hdc, x, 450
 
     inc i
@@ -128,11 +128,11 @@ HLoop:
 
     mov eax, i
     mul cellSize
-    add eax, 50  ; Adjusted to start at 50
+    add eax, 70  ; Adjusted to start at 50
     mov y, eax
 
-    invoke MoveToEx, hdc, 50, y, NULL
-    invoke LineTo, hdc, 450, y
+    invoke MoveToEx, hdc, 200, y, NULL
+    invoke LineTo, hdc, 580, y
 
     inc i
     jmp HLoop

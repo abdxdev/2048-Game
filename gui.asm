@@ -110,6 +110,8 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
         invoke TextOut, hdc, 50, 50, addr AppTitle, 10     ; "2048 Game"
         invoke TextOut, hdc, 100, 100, addr JetBrainsFont, 16  ; Debug Font Name
 
+        invoke DrawGrid, hdc
+
         ; Restore Old Font & Delete Created Font
         invoke SelectObject, hdc, ps.hdc
         invoke DeleteObject, hFont
@@ -124,4 +126,4 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     ret
 WndProc endp
 
-; end start
+ end start
