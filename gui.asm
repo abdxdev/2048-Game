@@ -4,6 +4,7 @@ option casemap:none
 
 include utils.inc
 
+
 .data
     ClassName   db "MainWinClass", 0
     AppTitle    db "2048 Game", 0
@@ -11,7 +12,7 @@ include utils.inc
     wc          WNDCLASS <>
     hexColor    dd  00ffd0c7h
     gridCellNo dd 16 dup(0)
-    num dd 2, 4, 8, 16, 32, 64, 128, 256, 428
+    num dd 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16
 
 .code
 start:
@@ -38,7 +39,7 @@ start:
     .endif
 
     ; Create Window
-    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, wc.hInstance, NULL
+    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 520, 800, NULL, NULL, wc.hInstance, NULL
     .if eax == NULL
         invoke ExitProcess, 0
     .endif
@@ -65,38 +66,29 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
 
     .if uMsg == WM_DESTROY
         invoke PostQuitMessage, 0
-        ret
     .elseif uMsg == WM_PAINT
-        ; Begin painting
+
+        ; Draw Grid
         invoke BeginPaint, hWnd, addr ps
-        mov hdc, eax
-        
-        ; Draw grid
+        mov hdc, eax        
         invoke DrawGrid, hdc
-
-        ; Populate and display grid numbers
         mov counter, 0
-        .repeat
-            invoke GetRandomIndex, 9
-            push edx
-            invoke Sleep, 10
-            mov ecx, OFFSET num
-            pop edx
-            mov eax, [ecx + edx * 4]
 
-            ; Display number in the selected cell
+        .repeat
+            invoke Sleep, 10
+            mov eax, counter
+            mov eax, [num + eax * 4]
             invoke DisplayNumber, hdc, counter, eax
-            
             inc counter
         .until counter >= 16
-
-        ; End painting
+        
         invoke EndPaint, hWnd, addr ps
-        ret
+
     .else
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam
-        ret
     .endif
+    ret
+
 WndProc endp
 
 end start
