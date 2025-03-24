@@ -14,11 +14,13 @@ include utils.inc
     gridCellNo dd 16 dup(0)
     num dd 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16
 
-    ScoreText db "Score: 0", 0
+    ScoreText dd OFFSET szScore
+    szScore db "Score: 0", 0
     hScoreLabel dd ?
     ID_SCORE_LABEL equ 1001
 
-    HighScoreText db "High Score: 0", 0
+    HighScoreText dd OFFSET szHighScore
+    szHighScore db "High Score: 0", 0
     hHighScoreLabel dd ?
     ID_HIGHSCORE_LABEL equ 1002
 
@@ -81,11 +83,11 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
 
     .elseif uMsg == WM_CREATE
         ; Create Score Label
-        invoke CreateLabel, hWnd, addr ScoreText, 625, 70, 130, 30, ID_SCORE_LABEL
+        invoke CreateLabel, hWnd, ScoreText, 625, 70, 130, 30, ID_SCORE_LABEL
         mov hScoreLabel, eax  ; Store the handle 
 
         ; Create High Score Label
-        invoke CreateLabel, hWnd, addr HighScoreText, 625, 125, 130, 30, ID_HIGHSCORE_LABEL
+        invoke CreateLabel, hWnd, HighScoreText, 625, 125, 130, 30, ID_HIGHSCORE_LABEL
         mov hHighScoreLabel, eax  ; Store the handle        
 
         ; Update Score
