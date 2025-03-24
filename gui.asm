@@ -11,18 +11,12 @@ include utils.inc
     msg         MSG <>
 
     wc          WNDCLASS <>
-<<<<<<< HEAD
-    hexColor    dd  00ffd0c7h
-    gridCellNo dd 16 dup(0)
-    num dd 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16
-=======
     hexColor    dd  00FFD0C7h   ; Background color (Light Peach)
     gridCellNo  dd 16 dup(0)
     num         dd 2, 4, 8, 16, 32, 64, 128, 256, 428
 
     JetBrainsFont db "JetBrains Mono", 0
     hwndMain    dd 0   ; Store main window handle
->>>>>>> d50cf2e (Updated the file with new changes)
 
 .code
 start:
@@ -52,17 +46,12 @@ start:
     .endif
 
     ; Create Window
-<<<<<<< HEAD
-    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 520, 800, NULL, NULL, wc.hInstance, NULL
-    .if eax == NULL
-=======
     invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, 
                            CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, 
                            wc.hInstance, NULL
     mov hwndMain, eax
     .if hwndMain == NULL
         invoke MessageBox, NULL, addr AppTitle, addr ClassName, MB_OK
->>>>>>> d50cf2e (Updated the file with new changes)
         invoke ExitProcess, 0
     .endif
 
@@ -90,31 +79,6 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
 
     .if uMsg == WM_DESTROY
         invoke PostQuitMessage, 0
-<<<<<<< HEAD
-    .elseif uMsg == WM_PAINT
-
-        ; Draw Grid
-        invoke BeginPaint, hWnd, addr ps
-        mov hdc, eax        
-        invoke DrawGrid, hdc
-        mov counter, 0
-
-        .repeat
-            invoke Sleep, 10
-            mov eax, counter
-            mov eax, [num + eax * 4]
-            invoke DisplayNumber, hdc, counter, eax
-            inc counter
-        .until counter >= 16
-        
-        invoke EndPaint, hWnd, addr ps
-
-    .else
-        invoke DefWindowProc, hWnd, uMsg, wParam, lParam
-    .endif
-    ret
-
-=======
         ret
 
     .elseif uMsg == WM_PAINT
@@ -158,7 +122,6 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     ; Call Default Window Procedure for unhandled messages
     invoke DefWindowProc, hWnd, uMsg, wParam, lParam
     ret
->>>>>>> d50cf2e (Updated the file with new changes)
 WndProc endp
 
 end start
