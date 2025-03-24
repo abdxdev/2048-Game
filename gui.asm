@@ -124,4 +124,4 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     ret
 WndProc endp
 
-end start
+; end start
