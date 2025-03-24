@@ -10,7 +10,7 @@ include utils.inc
     msg         MSG <>
     wc          WNDCLASS <>
     hexColor    dd  00ffd0c7h
-    gridCellNo dd 16 dup(0)
+    gridCellNo  dd 16 dup(0)
     num dd 2, 4, 8, 16, 32, 64, 128, 256, 428
 
 .code

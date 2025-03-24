@@ -85,8 +85,8 @@ GetRandomIndex proc arrSize:DWORD
     INVOKE GetTickCount                 ;TickCount stored in eax
 
     push eax
-    INVOKE printf, ADDR tickFmt, eax    ;This fkr modifies all gen register values, use with caution, save yourself hours of debugging
-    pop eax
+    INVOKE printf, ADDR tickFmt, eax    ;This fkr modifies all gen register values, use with caution,
+    pop eax                             ; save yourself hours of debugging
 
     xor edx, edx
     mov ebx, arrSize
