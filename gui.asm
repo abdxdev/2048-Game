@@ -12,7 +12,6 @@ include utils.inc
     hexColor    dd  00ffd0c7h
     gridCellNo dd 16 dup(0)
     num dd 2, 4, 8, 16, 32, 64, 128, 256, 428
-    counter dd 0
 
 .code
 start:
@@ -58,44 +57,46 @@ start:
 
     invoke ExitProcess, 0
 
-; Window Procedure
+; Main Window Procedure
 WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     LOCAL ps:PAINTSTRUCT
     LOCAL hdc:DWORD
+    LOCAL counter:DWORD
 
-    .if uMsg == WM_PAINT
-        Invoke BeginPaint, hWnd, addr ps
-        
-        mov hdc, eax                   
-        INVOKE DrawGrid, hdc
-
-        LOOP1:
-        ; Get random index (0-8) from num array
-        INVOKE GetRandomIndex, 9        ; Returns in edx
-        push edx
-        INVOKE Sleep, 10   
-        mov ecx, OFFSET num             ; Base address of num array
-        pop edx
-        mov eax, [ecx + edx * 4]        ; Get the number from the array
-        
-        ; Display the number in the selected cell
-        INVOKE DisplayNumber, hdc, counter, eax
-        
-        inc counter
-        cmp counter, 16
-        jl LOOP1
-
-        INVOKE EndPaint, hWnd, addr ps
-        xor eax, eax
-        ret
-    .elseif uMsg == WM_DESTROY
+    .if uMsg == WM_DESTROY
         invoke PostQuitMessage, 0
+        ret
+    .elseif uMsg == WM_PAINT
+        ; Begin painting
+        invoke BeginPaint, hWnd, addr ps
+        mov hdc, eax
+        
+        ; Draw grid
+        invoke DrawGrid, hdc
+
+        ; Populate and display grid numbers
+        mov counter, 0
+        .repeat
+            invoke GetRandomIndex, 9
+            push edx
+            invoke Sleep, 10
+            mov ecx, OFFSET num
+            pop edx
+            mov eax, [ecx + edx * 4]
+
+            ; Display number in the selected cell
+            invoke DisplayNumber, hdc, counter, eax
+            
+            inc counter
+        .until counter >= 16
+
+        ; End painting
+        invoke EndPaint, hWnd, addr ps
+        ret
     .else
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam
         ret
     .endif
-    xor eax, eax
-    ret
 WndProc endp
 
 end start
