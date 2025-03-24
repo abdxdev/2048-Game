@@ -4,29 +4,42 @@ option casemap:none
 
 include utils.inc
 
+
 .data
     ClassName   db "MainWinClass", 0
     AppTitle    db "2048 Game", 0
     msg         MSG <>
+
     wc          WNDCLASS <>
+<<<<<<< HEAD
     hexColor    dd  00ffd0c7h
+    gridCellNo dd 16 dup(0)
+    num dd 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16, 2, 4, 8, 16
+=======
+    hexColor    dd  00FFD0C7h   ; Background color (Light Peach)
     gridCellNo  dd 16 dup(0)
-    num dd 2, 4, 8, 16, 32, 64, 128, 256, 428
+    num         dd 2, 4, 8, 16, 32, 64, 128, 256, 428
+
+    JetBrainsFont db "JetBrains Mono", 0
+    hwndMain    dd 0   ; Store main window handle
+>>>>>>> d50cf2e (Updated the file with new changes)
 
 .code
 start:
+    ; Get Module Handle
+    invoke GetModuleHandle, NULL
+    mov wc.hInstance, eax
+
     ; Configure Window Class
     mov wc.style, CS_HREDRAW or CS_VREDRAW
     mov wc.lpfnWndProc, offset WndProc
     mov wc.lpszClassName, offset ClassName
-    invoke GetModuleHandle, NULL
-    mov wc.hInstance, eax
     invoke LoadIcon, NULL, IDI_APPLICATION
     mov wc.hIcon, eax
     invoke LoadCursor, NULL, IDC_ARROW
     mov wc.hCursor, eax
 
-    ; Background color
+    ; Set Background Color
     invoke ConvertHexColor, hexColor
     invoke CreateSolidBrush, eax
     mov wc.hbrBackground, eax
@@ -34,18 +47,28 @@ start:
     ; Register Class
     invoke RegisterClass, addr wc
     .if eax == 0
+        invoke MessageBox, NULL, addr ClassName, addr AppTitle, MB_OK
         invoke ExitProcess, 0
     .endif
 
     ; Create Window
-    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, wc.hInstance, NULL
+<<<<<<< HEAD
+    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 520, 800, NULL, NULL, wc.hInstance, NULL
     .if eax == NULL
+=======
+    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, 
+                           CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, 
+                           wc.hInstance, NULL
+    mov hwndMain, eax
+    .if hwndMain == NULL
+        invoke MessageBox, NULL, addr AppTitle, addr ClassName, MB_OK
+>>>>>>> d50cf2e (Updated the file with new changes)
         invoke ExitProcess, 0
     .endif
 
     ; Show & Update Window
-    invoke ShowWindow, eax, SW_SHOWNORMAL
-    invoke UpdateWindow, eax
+    invoke ShowWindow, hwndMain, SW_SHOWNORMAL
+    invoke UpdateWindow, hwndMain
 
     ; Message Loop
     .while TRUE
@@ -57,46 +80,85 @@ start:
 
     invoke ExitProcess, 0
 
+;------------------------------------------------------
 ; Main Window Procedure
+;------------------------------------------------------
 WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     LOCAL ps:PAINTSTRUCT
     LOCAL hdc:DWORD
-    LOCAL counter:DWORD
+    LOCAL hFont:DWORD
 
     .if uMsg == WM_DESTROY
         invoke PostQuitMessage, 0
-        ret
+<<<<<<< HEAD
     .elseif uMsg == WM_PAINT
-        ; Begin painting
+
+        ; Draw Grid
         invoke BeginPaint, hWnd, addr ps
-        mov hdc, eax
-        
-        ; Draw grid
+        mov hdc, eax        
         invoke DrawGrid, hdc
-
-        ; Populate and display grid numbers
         mov counter, 0
-        .repeat
-            invoke GetRandomIndex, 9
-            push edx
-            invoke Sleep, 10
-            mov ecx, OFFSET num
-            pop edx
-            mov eax, [ecx + edx * 4]
 
-            ; Display number in the selected cell
+        .repeat
+            invoke Sleep, 10
+            mov eax, counter
+            mov eax, [num + eax * 4]
             invoke DisplayNumber, hdc, counter, eax
-            
             inc counter
         .until counter >= 16
-
-        ; End painting
+        
         invoke EndPaint, hWnd, addr ps
-        ret
+
     .else
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam
-        ret
     .endif
+    ret
+
+=======
+        ret
+
+    .elseif uMsg == WM_PAINT
+        invoke BeginPaint, hWnd, addr ps
+        mov hdc, eax
+
+        ; Create JetBrains Mono Font
+        invoke CreateFont, 24, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+                          DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
+                          CLEARTYPE_QUALITY, FF_DONTCARE, addr JetBrainsFont
+        mov hFont, eax
+
+        ; Check if the font was created successfully
+        .if hFont == NULL
+            invoke MessageBox, hWnd, addr JetBrainsFont, addr AppTitle, MB_OK
+            invoke EndPaint, hWnd, addr ps
+            ret
+        .endif
+
+        invoke SelectObject, hdc, hFont
+
+        ; Set Text Color
+        invoke SetTextColor, hdc, 000000FFh   ; Blue color
+
+        ; Set Background Mode Transparent
+        invoke SetBkMode, hdc, TRANSPARENT
+
+        ; Display Sample Text
+        invoke TextOut, hdc, 50, 50, addr AppTitle, 10     ; "2048 Game"
+        invoke TextOut, hdc, 100, 100, addr JetBrainsFont, 16  ; Debug Font Name
+
+        ; Restore Old Font & Delete Created Font
+        invoke SelectObject, hdc, ps.hdc
+        invoke DeleteObject, hFont
+
+        invoke EndPaint, hWnd, addr ps
+        ret
+
+    .endif
+
+    ; Call Default Window Procedure for unhandled messages
+    invoke DefWindowProc, hWnd, uMsg, wParam, lParam
+    ret
+>>>>>>> d50cf2e (Updated the file with new changes)
 WndProc endp
 
 end start
