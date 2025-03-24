@@ -5,6 +5,7 @@
 include c:/Irvine/Irvine32.inc
 
 .data
+    a DD ?
     WinScore DD 2048
     IsWon DD 0
     IsInfiniteMode DD 0
