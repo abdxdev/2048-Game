@@ -28,6 +28,9 @@ include utils.inc
     hButton dd ?
     ID_BUTTON equ 1003
 
+    title20 db "20", 0
+    title48 db "48", 0
+
 .code
 start:
     ; Configure Window Class
@@ -109,6 +112,20 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
         ; Draw Grid
         invoke BeginPaint, hWnd, addr ps
         mov hdc, eax        
+
+        ;Draw Title
+
+        invoke CreateFont, 150, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, addr title20
+        invoke SelectObject, hdc, eax
+
+        invoke SetTextColor, hdc, 00663300h
+        invoke SetBkMode, hdc, TRANSPARENT
+
+        invoke TextOut, hdc, 30, 130, addr title20, 3
+        invoke TextOut, hdc, 30, 250, addr title48, 3
+
+        invoke SetTextColor, hdc, 00000000h
+
         invoke DrawGrid, hdc
         mov counter, 0
 

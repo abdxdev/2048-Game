@@ -175,9 +175,13 @@ DisplayNumber proc hdc:DWORD, cellNo:DWORD, number:DWORD
     ; Select the font into DC
     invoke SelectObject, hdc, hFont
 
+    invoke SetTextColor, hdc, 00102040h
+
     ; Display the number
     invoke lstrlenA, ADDR strBuffer
     invoke TextOutA, hdc, cellX, cellY, ADDR strBuffer, eax
+
+    invoke SetTextColor, hdc, 00000000h
 
     ret
 DisplayNumber endp
