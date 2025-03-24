@@ -189,34 +189,9 @@ is_won PROC
     ret
 is_won ENDP
 
-; copy_to_temp PROC
-;     LOCAL i:DWORD
-;     mov i, 0
-;     .while i < lengthof Board
-;         mov eax, i
-;         mov edx, DWORD PTR Board[eax*Type Board]
-;         mov DWORD PTR TempBoard[eax*Type Board], edx
-;         inc i
-;     .endw
-;     ret
-; copy_to_temp ENDP
-
-; copy_from_temp PROC
-;     LOCAL i:DWORD
-;     mov i, 0
-;     .while i < lengthof Board
-;         mov eax, i
-;         mov edx, DWORD PTR TempBoard[eax*Type Board]
-;         mov DWORD PTR Board[eax*Type Board], edx
-;         inc i
-;     .endw
-;     ret
-; copy_from_temp ENDP
-
 move PROC, direction:DWORD
     LOCAL i:DWORD, j:DWORD, index:DWORD, value:DWORD, k:DWORD, l:DWORD, moved:DWORD
     mov moved, 0
-    ; invoke copy_to_temp
     
     .if direction == 0 ; Up
         mov j, 0
@@ -422,7 +397,6 @@ move PROC, direction:DWORD
         mov DWORD PTR Board[edx*Type Board], eax
         mov eax, 1
     .else
-        ; invoke copy_from_temp
         mov eax, 0
     .endif
     ret
@@ -460,24 +434,26 @@ run PROC
         invoke get_user_input
         .if eax == -2
             invoke ExitProcess, 0
-        .elseif eax != -1
-            invoke move, eax
-            .if eax == 1
-                invoke Clrscr
-                invoke display_board
+        .elseif eax == -1
+            .continue
+        .endif
+        
+        invoke move, eax
+        .continue .if eax != 1
 
-                invoke is_won 
-                .if eax == 1
-                    invoke MessageBox, NULL, addr msgYouWon, NULL, MB_OK
-                    invoke ExitProcess, 0
-                .endif
-                
-                invoke is_game_over
-                .if eax == 1
-                    invoke MessageBox, NULL, addr msgGameOver, NULL, MB_OK
-                    invoke ExitProcess, 0
-                .endif
-            .endif
+        invoke Clrscr
+        invoke display_board
+
+        invoke is_won 
+        .if eax == 1
+            invoke MessageBox, NULL, addr msgYouWon, NULL, MB_OK
+            invoke ExitProcess, 0
+        .endif
+        
+        invoke is_game_over
+        .if eax == 1
+            invoke MessageBox, NULL, addr msgGameOver, NULL, MB_OK
+            invoke ExitProcess, 0
         .endif
     .endw
     
