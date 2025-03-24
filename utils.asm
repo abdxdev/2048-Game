@@ -10,6 +10,7 @@ include utils.inc
     hFont dd 0      ; Font handle
     tickFmt db "Tick Count: %u", 10, 0  ; For Debug
     FontName db "JetBrains Mono", 0
+    szStatic db "STATIC", 0
 
 .code
 
@@ -179,5 +180,12 @@ DisplayNumber proc hdc:DWORD, cellNo:DWORD, number:DWORD
 
     ret
 DisplayNumber endp
+
+; Create a label
+CreateLabel PROC hWnd:DWORD, text:DWORD, x:DWORD, y:DWORD, w:DWORD, h:DWORD, id:DWORD
+    invoke CreateWindowEx, 0, addr szStatic, text, WS_CHILD or WS_VISIBLE or SS_CENTER or SS_CENTERIMAGE,\
+                           x, y, w, h, hWnd, id, NULL, NULL
+    ret
+CreateLabel ENDP
 
 end

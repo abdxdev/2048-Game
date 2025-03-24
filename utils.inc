@@ -15,3 +15,4 @@ DrawGrid PROTO :DWORD
 printf PROTO C :PTR SBYTE, :VARARG   
 DisplayNumber PROTO :DWORD, :DWORD, :DWORD
 CaptureKeyInput PROTO
+CreateLabel PROTO :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
