@@ -11,6 +11,7 @@ include utils.inc
     tickFmt db "Tick Count: %u", 10, 0  ; For Debug
     FontName db "JetBrains Mono", 0
     szStatic db "STATIC", 0
+    szButton db "BUTTON", 0
 
 .code
 
@@ -187,5 +188,12 @@ CreateLabel PROC hWnd:DWORD, text:DWORD, x:DWORD, y:DWORD, w:DWORD, h:DWORD, id:
                            x, y, w, h, hWnd, id, NULL, NULL
     ret
 CreateLabel ENDP
+
+;Create a button
+CreateButton PROC hWnd:DWORD, text:DWORD, x:DWORD, y:DWORD, w:DWORD, h:DWORD, id:DWORD
+    invoke CreateWindowEx, 0, addr szButton, text, WS_CHILD or WS_VISIBLE or BS_PUSHBUTTON,\
+                           x, y, w, h, hWnd, id, NULL, NULL
+    ret
+CreateButton ENDP
 
 end

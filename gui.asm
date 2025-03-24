@@ -22,6 +22,10 @@ include utils.inc
     hHighScoreLabel dd ?
     ID_HIGHSCORE_LABEL equ 1002
 
+    ButtonText db "Reset", 0
+    hButton dd ?
+    ID_BUTTON equ 1003
+
 .code
 start:
     ; Configure Window Class
@@ -37,7 +41,7 @@ start:
 
     ; Background color
     invoke ConvertHexColor, hexColor
-    invoke CreateSolidBrush, eaxs
+    invoke CreateSolidBrush, eax
     mov wc.hbrBackground, eax
 
     ; Register Class
@@ -79,13 +83,24 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
         ; Create Score Label
         invoke CreateLabel, hWnd, addr ScoreText, 625, 70, 130, 30, ID_SCORE_LABEL
         mov hScoreLabel, eax  ; Store the handle 
-        
+
         ; Create High Score Label
         invoke CreateLabel, hWnd, addr HighScoreText, 625, 125, 130, 30, ID_HIGHSCORE_LABEL
-        mov hHighScoreLabel, eax  ; Store the handle
-        
+        mov hHighScoreLabel, eax  ; Store the handle        
+
         ; Update Score
         ; SetWindowText, hScoreLabel, addr NewScoreText
+
+        ; Create Button
+        invoke CreateButton, hWnd, addr ButtonText, 625, 420, 130, 30, ID_BUTTON
+        mov hButton, eax  ; Store the handle
+
+    .elseif uMsg == WM_COMMAND
+        mov eax, wParam
+        .if ax == ID_BUTTON
+            ; Button Clicked: Do something (e.g., reset game)
+            invoke MessageBox, hWnd, addr ButtonText, addr AppTitle, MB_OK
+        .endif
      
     .elseif uMsg == WM_PAINT
 
