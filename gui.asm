@@ -39,7 +39,7 @@ start:
     .endif
 
     ; Create Window
-    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 520, 800, NULL, NULL, wc.hInstance, NULL
+    invoke CreateWindowEx, 0, addr ClassName, addr AppTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, wc.hInstance, NULL
     .if eax == NULL
         invoke ExitProcess, 0
     .endif

@@ -99,17 +99,17 @@ GetRandomIndex endp
 DrawGrid proc hdc:DWORD
     LOCAL i:DWORD, x:DWORD, y:DWORD, cellSize:DWORD
 
-    mov cellSize, 100  ; Cell size
+    mov cellSize, 95  ; Cell size
 
     ; Draw vertical lines (5 lines for 4 cells)
     mov i, 0
     .while i < 5
         mov eax, i
         mul cellSize
-        add eax, 50
+        add eax, 200
         mov x, eax
 
-        invoke MoveToEx, hdc, x, 50, NULL
+        invoke MoveToEx, hdc, x, 70, NULL
         invoke LineTo, hdc, x, 450
 
         inc i
@@ -120,11 +120,11 @@ DrawGrid proc hdc:DWORD
     .while i < 5
         mov eax, i
         mul cellSize
-        add eax, 50
+        add eax, 70
         mov y, eax
 
-        invoke MoveToEx, hdc, 50, y, NULL
-        invoke LineTo, hdc, 450, y
+        invoke MoveToEx, hdc, 200, y, NULL
+        invoke LineTo, hdc, 580, y
 
         inc i
     .endw
@@ -151,14 +151,14 @@ DisplayNumber proc hdc:DWORD, cellNo:DWORD, number:DWORD
 
     ; Calculate the center of the cell
     mov eax, col
-    mov ecx, 100
+    mov ecx, 95
     mul ecx
-    add eax, 85  ; Adjust for better centering
+    add eax, 235  ; Adjust for better centering
     mov cellX, eax
 
     mov eax, row
     mul ecx
-    add eax, 85  ; Adjust for better centering
+    add eax, 98  ; Adjust for better centering
     mov cellY, eax
 
     ; Set text background to transparent
