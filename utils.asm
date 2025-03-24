@@ -9,6 +9,7 @@ include utils.inc
     fmt db "%d", 0  ; Format for integer conversion
     hFont dd 0      ; Font handle
     tickFmt db "Tick Count: %u", 10, 0  ; For Debug
+    FontName db "JetBrains Mono", 0
 
 .code
 
@@ -82,10 +83,10 @@ CaptureKeyInput endp
 
 ; Get random index
 GetRandomIndex proc arrSize:DWORD
-    INVOKE GetTickCount                 ;TickCount stored in eax
+    invoke GetTickCount                 ;TickCount stored in eax
 
     push eax
-    INVOKE printf, ADDR tickFmt, eax    ;This fkr modifies all gen register values, use with caution, save yourself hours of debugging
+    invoke printf, ADDR tickFmt, eax    ;This fkr modifies all gen register values, use with caution, save yourself hours of debugging
     pop eax
 
     xor edx, edx
@@ -96,65 +97,53 @@ GetRandomIndex endp
 
 ; Draw grid
 DrawGrid proc hdc:DWORD
-    LOCAL i:DWORD
-    LOCAL x:DWORD
-    LOCAL y:DWORD
-    LOCAL cellSize:DWORD
+    LOCAL i:DWORD, x:DWORD, y:DWORD, cellSize:DWORD
 
-    mov cellSize, 100  ; 
+    mov cellSize, 100  ; Cell size
 
     ; Draw vertical lines (5 lines for 4 cells)
     mov i, 0
-VLoop:
-    cmp i, 5
-    jge HLoopStart
+    .while i < 5
+        mov eax, i
+        mul cellSize
+        add eax, 50
+        mov x, eax
 
-    mov eax, i
-    mul cellSize
-    add eax, 50  ; Adjusted to start at 50
-    mov x, eax
+        invoke MoveToEx, hdc, x, 50, NULL
+        invoke LineTo, hdc, x, 450
 
-    invoke MoveToEx, hdc, x, 50, NULL
-    invoke LineTo, hdc, x, 450
+        inc i
+    .endw
 
-    inc i
-    jmp VLoop
-
-HLoopStart:
+    ; Draw horizontal lines (5 lines for 4 cells)
     mov i, 0
-HLoop:
-    cmp i, 5
-    jge Done
+    .while i < 5
+        mov eax, i
+        mul cellSize
+        add eax, 50
+        mov y, eax
 
-    mov eax, i
-    mul cellSize
-    add eax, 50  ; Adjusted to start at 50
-    mov y, eax
+        invoke MoveToEx, hdc, 50, y, NULL
+        invoke LineTo, hdc, 450, y
 
-    invoke MoveToEx, hdc, 50, y, NULL
-    invoke LineTo, hdc, 450, y
+        inc i
+    .endw
 
-    inc i
-    jmp HLoop
-
-Done:
     ret
 DrawGrid endp
 
 DisplayNumber proc hdc:DWORD, cellNo:DWORD, number:DWORD
     LOCAL strBuffer[12]:BYTE  ; (max 3 digits + null terminator)
-    LOCAL cellX:DWORD
-    LOCAL cellY:DWORD
-    LOCAL row:DWORD
-    LOCAL col:DWORD
+    LOCAL cellX:DWORD, cellY:DWORD
+    LOCAL row:DWORD, col:DWORD
 
     ; Convert number to string
     invoke wsprintfA, ADDR strBuffer, ADDR fmt, number
 
     ; Compute row and column
     mov eax, cellNo
-    mov edx, 0
     mov ecx, 4
+    xor edx, edx
     div ecx   ; EAX = row, EDX = col
 
     mov row, eax
@@ -162,28 +151,24 @@ DisplayNumber proc hdc:DWORD, cellNo:DWORD, number:DWORD
 
     ; Calculate the center of the cell
     mov eax, col
-    mov ebx, 100
-    mul ebx
-    add eax, 50  ; Left margin
-    add eax, 35  ; Adjust for better centering
+    mov ecx, 100
+    mul ecx
+    add eax, 85  ; Adjust for better centering
     mov cellX, eax
 
     mov eax, row
-    mov ebx, 100
-    mul ebx
-    add eax, 50  ; Top margin
-    add eax, 35  ; Adjust for better centering
+    mul ecx
+    add eax, 85  ; Adjust for better centering
     mov cellY, eax
 
     ; Set text background to transparent
     invoke SetBkMode, hdc, TRANSPARENT
 
-    ; Create a larger font
-    cmp hFont, 0
-    jne FontExists
-    invoke CreateFontA, 40, 0, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH or FF_DONTCARE, NULL
-    mov hFont, eax
-FontExists:
+    ; Create a larger font if it does not exist
+    .if hFont == 0
+        invoke CreateFontA, 40, 0, 0, 0, FW_BOLD, 0, 0, 0, ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH or FF_DONTCARE, OFFSET FontName
+        mov hFont, eax
+    .endif
 
     ; Select the font into DC
     invoke SelectObject, hdc, hFont
