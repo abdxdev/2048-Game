@@ -4,21 +4,15 @@ option casemap:none
 
 include utils.inc
 
-include \masm32\include\windows.inc
-include \masm32\include\kernel32.inc
-include \masm32\include\user32.inc
-include \masm32\include\gdi32.inc
-
-includelib \masm32\lib\kernel32.lib
-includelib \masm32\lib\user32.lib
-includelib \masm32\lib\gdi32.lib
-
 .data
     ClassName   db "MainWinClass", 0
     AppTitle    db "2048 Game", 0
     msg         MSG <>
     wc          WNDCLASS <>
     hexColor    dd  00ffd0c7h
+    gridCellNo dd 16 dup(0)
+    num dd 2, 4, 8, 16, 32, 64, 128, 256, 428
+    counter dd 0
 
 .code
 start:
@@ -66,7 +60,35 @@ start:
 
 ; Window Procedure
 WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
-    .if uMsg == WM_DESTROY
+    LOCAL ps:PAINTSTRUCT
+    LOCAL hdc:DWORD
+
+    .if uMsg == WM_PAINT
+        Invoke BeginPaint, hWnd, addr ps
+        
+        mov hdc, eax                   
+        INVOKE DrawGrid, hdc
+
+        LOOP1:
+        ; Get random index (0-8) from num array
+        INVOKE GetRandomIndex, 9        ; Returns in edx
+        push edx
+        INVOKE Sleep, 10   
+        mov ecx, OFFSET num             ; Base address of num array
+        pop edx
+        mov eax, [ecx + edx * 4]        ; Get the number from the array
+        
+        ; Display the number in the selected cell
+        INVOKE DisplayNumber, hdc, counter, eax
+        
+        inc counter
+        cmp counter, 16
+        jl LOOP1
+
+        INVOKE EndPaint, hWnd, addr ps
+        xor eax, eax
+        ret
+    .elseif uMsg == WM_DESTROY
         invoke PostQuitMessage, 0
     .else
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam
