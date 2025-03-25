@@ -4,7 +4,6 @@ option casemap:none
 
 include utils.inc
 
-
 .data
     ClassName db "MainWinClass", 0
     AppTitle db "2048 Game", 0
@@ -86,11 +85,11 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
 
     .elseif uMsg == WM_CREATE
         ; Create Score Label
-        invoke CreateLabel, hWnd, ScoreText, 625, 70, 130, 30, ID_SCORE_LABEL
+        invoke CreateLabel, hWnd, ScoreText, 625, 270, 130, 30, ID_SCORE_LABEL
         mov hScoreLabel, eax  ; Store the handle 
 
         ; Create High Score Label
-        invoke CreateLabel, hWnd, HighScoreText, 625, 125, 130, 30, ID_HIGHSCORE_LABEL
+        invoke CreateLabel, hWnd, HighScoreText, 625, 310, 130, 30, ID_HIGHSCORE_LABEL
         mov hHighScoreLabel, eax  ; Store the handle        
 
         ; Update Score
@@ -114,15 +113,14 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
         mov hdc, eax        
 
         ;Draw Title
-
-        invoke CreateFont, 150, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, addr title20
+        invoke CreateFont, 130, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, addr title20
         invoke SelectObject, hdc, eax
 
         invoke SetTextColor, hdc, 00663300h
         invoke SetBkMode, hdc, TRANSPARENT
 
-        invoke TextOut, hdc, 30, 130, addr title20, 3
-        invoke TextOut, hdc, 30, 250, addr title48, 3
+        invoke TextOut, hdc, 625, 45, addr title20, 3
+        invoke TextOut, hdc, 625, 140, addr title48, 3
 
         invoke SetTextColor, hdc, 00000000h
 
