@@ -102,8 +102,9 @@ WndProc proc hWnd:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
     .elseif uMsg == WM_COMMAND
         mov eax, wParam
         .if ax == ID_BUTTON
-            ; Button Clicked: Do something (e.g., reset game)
-            invoke MessageBox, hWnd, addr ButtonText, addr AppTitle, MB_OK
+            ; Button Clicked: Mark window as invalid then repaint
+            invoke InvalidateRect, hWnd, NULL, TRUE
+            invoke UpdateWindow, hWnd
         .endif
      
     .elseif uMsg == WM_PAINT
