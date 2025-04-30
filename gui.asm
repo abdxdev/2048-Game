@@ -6,12 +6,10 @@ include C:\masm32\include\windows.inc
 include C:\masm32\include\kernel32.inc
 include C:\masm32\include\user32.inc
 include C:\masm32\include\gdi32.inc
-include C:\masm32\include\msvcrt.inc
 
 includelib C:\masm32\lib\kernel32.lib
 includelib C:\masm32\lib\user32.lib
 includelib C:\masm32\lib\gdi32.lib
-includelib C:\masm32\lib\msvcrt.lib
 
 printf PROTO C :dword, :vararg
 
@@ -1271,7 +1269,6 @@ WinMainProc proc, hWnd, uMsg, wParam, lParam
 invoke canMove
 .if gameEnd == 1
     invoke MessageBox, hWinMain, offset MSG_GAME_OVER_TXT, offset MSG_GAME_OVER_TITLE, MB_OK
-    ; ���¿�ʼ��Ϸ
     .if eax == IDOK
         invoke initGameData
         invoke InvalidateRect, hWnd, NULL, FALSE
